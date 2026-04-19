@@ -2,14 +2,16 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, RotateCw, Save, Copy, Check, AlertTriangle } from "lucide-react";
+import { RotateCw, Save, Copy, Check, AlertTriangle } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { StatusNotice } from "@/components/ui/status-notice";
+import { Spinner } from "@/components/ui/spinner";
 import { detectBannedPhrases } from "@/lib/schemas/outreach";
 
 export interface OutreachDraft {
@@ -22,7 +24,6 @@ export interface OutreachDraft {
 
 export function OutreachStudio({
   prospectId,
-  slug,
   initial,
   version,
 }: {
@@ -36,6 +37,7 @@ export function OutreachStudio({
   const [saving, setSaving] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
   function update<K extends keyof OutreachDraft>(k: K, v: string) {
@@ -48,11 +50,14 @@ export function OutreachStudio({
   async function save() {
     setSaving(true);
     try {
-      await fetch("/api/outreach", {
+      const res = await fetch("/api/outreach", {
         method: "PUT",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ prospect_id: prospectId, ...draft }),
       });
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.ok) setNotice(`Saved as version ${json.version}`);
+      else setNotice("Save failed");
       startTransition(() => router.refresh());
     } finally {
       setSaving(false);
@@ -62,11 +67,14 @@ export function OutreachStudio({
   async function regenerate() {
     setRegenerating(true);
     try {
-      await fetch("/api/outreach", {
+      const res = await fetch("/api/outreach", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ prospect_id: prospectId }),
       });
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.ok) setNotice(`Regenerated — now version ${json.version}`);
+      else setNotice("Regeneration failed");
       startTransition(() => router.refresh());
     } finally {
       setRegenerating(false);
@@ -76,6 +84,7 @@ export function OutreachStudio({
   async function copyField(label: string, text: string) {
     await navigator.clipboard.writeText(text);
     setCopied(label);
+    setNotice("Copied to clipboard");
     setTimeout(() => setCopied(null), 1600);
   }
 
@@ -83,20 +92,38 @@ export function OutreachStudio({
     <div className="mt-8 space-y-6">
       <div className="flex flex-wrap items-center gap-3">
         <Badge variant="muted">{`Version ${version}`}</Badge>
-        <Button variant="outline" size="sm" onClick={regenerate} disabled={regenerating || saving}>
-          {regenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCw className="h-3.5 w-3.5" />}
-          Regenerate
-        </Button>
-        <Button size="sm" onClick={save} disabled={saving || regenerating}>
-          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-          Save draft
-        </Button>
+        <LoadingButton
+          variant="outline"
+          size="sm"
+          loading={regenerating}
+          loadingText="Regenerating"
+          disabled={saving}
+          onClick={regenerate}
+        >
+          <RotateCw className="h-3.5 w-3.5" /> Regenerate
+        </LoadingButton>
+        <LoadingButton
+          size="sm"
+          loading={saving}
+          loadingText="Saving"
+          disabled={regenerating}
+          onClick={save}
+        >
+          <Save className="h-3.5 w-3.5" /> Save draft
+        </LoadingButton>
         {banned.length > 0 && (
           <Badge variant="warn">
             <AlertTriangle className="mr-1 h-3 w-3" /> {banned.length} banned phrase{banned.length > 1 ? "s" : ""}
           </Badge>
         )}
       </div>
+
+      {regenerating && (
+        <p className="fade-in flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-charcoal-500">
+          <Spinner className="text-accent-600" size="10px" />
+          Drafting email, DM, postcard, and call opener…
+        </p>
+      )}
 
       {banned.length > 0 && (
         <div className="rounded-md border border-amber-600/30 bg-amber-500/5 p-3 text-xs text-amber-900">
@@ -176,6 +203,8 @@ export function OutreachStudio({
       <p className="text-[11px] text-charcoal-500">
         Nothing is auto-sent. Copy + paste into your sending tool of choice, or hand off to the partnerships team.
       </p>
+
+      <StatusNotice open={!!notice} onClose={() => setNotice(null)} message={notice ?? ""} />
     </div>
   );
 }
@@ -210,7 +239,7 @@ function CopyBtn({ onClick, copied }: { onClick: () => void; copied: boolean }) 
   return (
     <button
       onClick={onClick}
-      className="inline-flex items-center gap-1 rounded-sm px-2 py-1 text-[11px] uppercase tracking-[0.14em] text-charcoal-500 hover:text-charcoal-900"
+      className="inline-flex items-center gap-1 rounded-sm px-2 py-1 text-[11px] uppercase tracking-[0.14em] text-charcoal-500 transition-colors hover:text-charcoal-900"
     >
       {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
       {copied ? "Copied" : "Copy"}
