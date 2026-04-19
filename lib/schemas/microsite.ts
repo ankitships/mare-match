@@ -28,10 +28,12 @@ export const MicrositePayloadSchema = z.object({
   }),
   theme: z
     .object({
-      accent_hex: z.string().optional(),
-      logo_url: z.string().optional(),
+      accent_hex: z.union([z.string(), z.null()]).optional().transform((v) => v ?? undefined),
+      logo_url: z.union([z.string(), z.null()]).optional().transform((v) => v ?? undefined),
     })
-    .optional(),
+    .nullable()
+    .optional()
+    .transform((v) => v ?? undefined),
 });
 
 export type MicrositePayload = z.infer<typeof MicrositePayloadSchema>;
