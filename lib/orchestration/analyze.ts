@@ -12,8 +12,6 @@
 // ============================================================================
 
 import { randomUUID } from "node:crypto";
-import fs from "node:fs/promises";
-import path from "node:path";
 
 import { crawlProspect, truncatePageContent } from "@/lib/crawl/firecrawl";
 import { getProvider } from "@/lib/ai/provider";
@@ -22,6 +20,7 @@ import { EvidencePayloadSchema, type EvidencePayload } from "@/lib/schemas/evide
 import { computeScore } from "@/lib/scoring/engine";
 import { store } from "@/lib/db/store";
 import { slugify } from "@/lib/utils";
+import { pickFixture, type FixtureFile } from "@/lib/fixtures";
 import type { ProspectRecord } from "@/lib/types";
 
 export interface AnalyzeInput {
@@ -40,42 +39,23 @@ export interface AnalyzeResult {
 }
 
 // -- Fixture routing: pick a fixture by URL/name heuristics --------------------
-async function loadFixtureFor(input: AnalyzeInput): Promise<EvidencePayload | null> {
-  const hay = `${input.website_url} ${input.name ?? ""}`.toLowerCase();
-  let file: string | null = null;
-  if (/desange|luxury|miami/.test(hay)) file = "strong-fit.json";
-  else if (/cutzone|express|discount/.test(hay)) file = "weak-fit.json";
-  else if (/rosano|ferretti|ambiguous/.test(hay)) file = "ambiguous.json";
-  else if (process.env.USE_FIXTURES === "1") file = "ambiguous.json";
-  if (!file) return null;
-
-  const raw = await fs.readFile(path.join(process.cwd(), "data", "fixtures", file), "utf8");
-  const parsed = JSON.parse(raw) as { evidence_payload: EvidencePayload };
-  return EvidencePayloadSchema.parse(parsed.evidence_payload);
+function loadFixtureFor(input: AnalyzeInput): EvidencePayload | null {
+  const hay = `${input.website_url} ${input.name ?? ""}`;
+  let fx = pickFixture(hay);
+  if (!fx && process.env.USE_FIXTURES === "1") fx = pickFixture("ambiguous");
+  if (!fx) return null;
+  return EvidencePayloadSchema.parse(fx.evidence_payload);
 }
 
-async function loadFixtureProspect(input: AnalyzeInput): Promise<{
-  name: string;
-  slug: string;
-  instagram_url?: string;
-  city?: string;
-  state?: string;
-} | null> {
-  const hay = `${input.website_url} ${input.name ?? ""}`.toLowerCase();
-  let file: string | null = null;
-  if (/desange|miami/.test(hay)) file = "strong-fit.json";
-  else if (/cutzone|express/.test(hay)) file = "weak-fit.json";
-  else if (/rosano|ferretti/.test(hay)) file = "ambiguous.json";
-  if (!file) return null;
-  const raw = await fs.readFile(path.join(process.cwd(), "data", "fixtures", file), "utf8");
-  const parsed = JSON.parse(raw) as { prospect: { name: string; slug: string; instagram_url?: string; city?: string; state?: string } };
-  return parsed.prospect;
+function loadFixtureProspect(input: AnalyzeInput): FixtureFile["prospect"] | null {
+  const fx = pickFixture(`${input.website_url} ${input.name ?? ""}`);
+  return fx?.prospect ?? null;
 }
 
 // ----------------------------------------------------------------------------
 export async function analyzeProspect(input: AnalyzeInput): Promise<AnalyzeResult> {
   // --- Step 1: upsert prospect --------------------------------------------
-  const fixtureProspect = await loadFixtureProspect(input);
+  const fixtureProspect = loadFixtureProspect(input);
   const name = input.name?.trim() || fixtureProspect?.name || deriveNameFromUrl(input.website_url);
   const slug = slugify(name);
 
@@ -121,13 +101,13 @@ export async function analyzeProspect(input: AnalyzeInput): Promise<AnalyzeResul
 
   // Prefer fixtures for speed if URL matches one OR if env forces it OR if no crawl
   if (process.env.USE_FIXTURES === "1" || crawled.length === 0) {
-    evidence = await loadFixtureFor(input);
+    evidence = loadFixtureFor(input);
     usedFixture = evidence !== null;
   }
 
   if (!evidence) {
     // We have crawled content — try fixtures first for known demo URLs
-    const fx = await loadFixtureFor(input);
+    const fx = loadFixtureFor(input);
     if (fx) {
       evidence = fx;
       usedFixture = true;
