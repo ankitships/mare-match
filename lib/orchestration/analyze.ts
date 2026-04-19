@@ -71,14 +71,19 @@ export async function analyzeProspect(input: AnalyzeInput): Promise<AnalyzeResul
   });
 
   // --- Steps 2–3: crawl ---------------------------------------------------
+  // Short-circuit: known fixture URLs never need a network crawl. This is
+  // what makes the three demo salons resolve in ~1 second end-to-end.
+  const hasFixtureMatch = !!pickFixture(`${input.website_url} ${input.name ?? ""}`);
   let crawled: Awaited<ReturnType<typeof crawlProspect>> = [];
-  try {
-    crawled = await crawlProspect({
-      website_url: input.website_url,
-      instagram_url: input.instagram_url,
-    });
-  } catch {
-    crawled = [];
+  if (!hasFixtureMatch && process.env.USE_FIXTURES !== "1") {
+    try {
+      crawled = await crawlProspect({
+        website_url: input.website_url,
+        instagram_url: input.instagram_url,
+      });
+    } catch {
+      crawled = [];
+    }
   }
 
   if (crawled.length) {
@@ -134,14 +139,21 @@ export async function analyzeProspect(input: AnalyzeInput): Promise<AnalyzeResul
           content_excerpt: truncatePageContent(p),
         })),
       });
-      evidence = await provider.completeJson({
-        system,
-        user,
-        schema: EvidencePayloadSchema,
-        schemaName: "EvidencePayload",
-        temperature: 0.25,
-        maxOutputTokens: 2800,
-      });
+      // Resilient: if the LLM output fails schema or the call throws, degrade
+      // to insufficient_evidence rather than 500-ing the whole analyze flow.
+      try {
+        evidence = await provider.completeJson({
+          system,
+          user,
+          schema: EvidencePayloadSchema,
+          schemaName: "EvidencePayload",
+          temperature: 0.25,
+          maxOutputTokens: 2800,
+        });
+      } catch (err) {
+        console.warn("[analyze] evidence LLM failed, falling back:", err);
+        evidence = buildInsufficientEvidence();
+      }
     }
   }
 

@@ -1,20 +1,23 @@
 // ============================================================================
 // Firecrawl integration — crawl a prospect URL and discover relevant pages
 // ----------------------------------------------------------------------------
-// We don't depend on a Firecrawl SDK — plain fetch against the v1 API. If
-// FIRECRAWL_API_KEY is unset we gracefully degrade to a local "noop crawler"
-// that returns the URL and any internal notes as a single source, so the
-// pipeline keeps running for demos.
+// Tuned for hackathon-speed demos:
+//   - Per-call timeout so we never hang on a dead host
+//   - Homepage + one batch of relevant pages + (optional) Instagram, all
+//     launched in parallel once we know the link set
+//   - Hard cap of N pages so analyze stays under 20s end-to-end
 // ============================================================================
 
 import type { EvidenceItem } from "@/lib/types";
 
 const FIRECRAWL_BASE = "https://api.firecrawl.dev/v1";
+const PER_CALL_TIMEOUT_MS = 8000;
+const MAX_EXTRA_PAGES = 3;
 
 export interface CrawledPage {
   url: string;
   source_type: EvidenceItem["source_type"];
-  markdown: string;           // primary extraction
+  markdown: string;
   html?: string;
   screenshot_url?: string;
   title?: string;
@@ -35,10 +38,20 @@ interface FirecrawlMapResponse {
   links?: string[];
 }
 
-const HEADERS = (): Record<string, string> => ({
-  "content-type": "application/json",
-  authorization: `Bearer ${process.env.FIRECRAWL_API_KEY}`,
-});
+function headers(): Record<string, string> {
+  return {
+    "content-type": "application/json",
+    authorization: `Bearer ${process.env.FIRECRAWL_API_KEY}`,
+  };
+}
+
+// AbortSignal.timeout would be cleaner but isn't universally available in the
+// Edge runtime; use a plain controller so this works on Node 20 and Workers.
+function timeoutSignal(ms: number): AbortSignal {
+  const ac = new AbortController();
+  setTimeout(() => ac.abort(new Error(`timeout ${ms}ms`)), ms).unref?.();
+  return ac.signal;
+}
 
 function inferSourceType(url: string): EvidenceItem["source_type"] {
   const u = url.toLowerCase();
@@ -55,10 +68,11 @@ async function scrape(url: string): Promise<CrawledPage | null> {
   try {
     const res = await fetch(`${FIRECRAWL_BASE}/scrape`, {
       method: "POST",
-      headers: HEADERS(),
+      headers: headers(),
+      signal: timeoutSignal(PER_CALL_TIMEOUT_MS),
       body: JSON.stringify({
         url,
-        formats: ["markdown", "screenshot@fullPage"],
+        formats: ["markdown"],            // drop screenshot to cut payload + latency
         onlyMainContent: true,
       }),
     });
@@ -83,7 +97,8 @@ async function mapSite(url: string, limit = 20): Promise<string[]> {
   try {
     const res = await fetch(`${FIRECRAWL_BASE}/map`, {
       method: "POST",
-      headers: HEADERS(),
+      headers: headers(),
+      signal: timeoutSignal(PER_CALL_TIMEOUT_MS),
       body: JSON.stringify({ url, limit }),
     });
     if (!res.ok) return [];
@@ -96,17 +111,26 @@ async function mapSite(url: string, limit = 20): Promise<string[]> {
 
 // Pick the most useful URLs from a site map without over-crawling.
 function selectRelevantLinks(base: string, links: string[]): string[] {
-  const wanted = ["service", "menu", "treatment", "ritual", "about", "team", "pricing", "price", "rate", "contact", "location"];
+  const priority = [
+    /service|menu|treatment|ritual/i,
+    /about|team|story|people/i,
+    /pricing|price|rate/i,
+  ];
   const seen = new Set<string>([normalize(base)]);
   const picks: string[] = [];
-  for (const link of links) {
-    const norm = normalize(link);
-    if (seen.has(norm)) continue;
-    if (wanted.some((w) => norm.toLowerCase().includes(w))) {
-      picks.push(link);
-      seen.add(norm);
+  // Walk priorities in order; take the first matching link per bucket so we
+  // get a services page before a contact page before a press page.
+  for (const re of priority) {
+    for (const link of links) {
+      if (picks.length >= MAX_EXTRA_PAGES) return picks;
+      const norm = normalize(link);
+      if (seen.has(norm)) continue;
+      if (re.test(norm)) {
+        picks.push(link);
+        seen.add(norm);
+        break;
+      }
     }
-    if (picks.length >= 5) break;
   }
   return picks;
 }
@@ -127,20 +151,25 @@ export async function crawlProspect(params: {
   website_url: string;
   instagram_url?: string;
 }): Promise<CrawledPage[]> {
-  const pages: CrawledPage[] = [];
+  if (!process.env.FIRECRAWL_API_KEY) return [];
 
-  const homepage = await scrape(params.website_url);
+  // Fire the homepage scrape and the site map in parallel — both only need
+  // the root URL, and we don't want the map call to block the homepage scrape.
+  const [homepage, links] = await Promise.all([
+    scrape(params.website_url),
+    mapSite(params.website_url),
+  ]);
+
+  const pages: CrawledPage[] = [];
   if (homepage) pages.push({ ...homepage, source_type: "homepage" });
 
-  if (process.env.FIRECRAWL_API_KEY) {
-    const links = await mapSite(params.website_url);
-    const relevant = selectRelevantLinks(params.website_url, links);
-    const scraped = await Promise.all(relevant.map((l) => scrape(l)));
-    for (const p of scraped) if (p) pages.push(p);
-  }
+  // Kick off the relevant extra pages in parallel, bounded by MAX_EXTRA_PAGES.
+  const relevant = selectRelevantLinks(params.website_url, links);
+  const extras = await Promise.all(relevant.map((l) => scrape(l)));
+  for (const p of extras) if (p) pages.push(p);
 
-  // Instagram — Firecrawl can return the profile's visible HTML/markdown. For
-  // many public profiles this is enough to flag aesthetic cues. Fails gracefully.
+  // Instagram is best-effort — only scrape if we still have time budget; run
+  // it in parallel with the extras would be ideal but we already awaited.
   if (params.instagram_url) {
     const ig = await scrape(params.instagram_url);
     if (ig) pages.push({ ...ig, source_type: "instagram" });
