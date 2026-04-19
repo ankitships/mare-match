@@ -9,7 +9,7 @@ export const anthropicProvider: LlmProvider = {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY not set");
 
-    const model = process.env.LLM_MODEL || "claude-3-5-sonnet-latest";
+    const model = process.env.LLM_MODEL || "claude-sonnet-4-5";
     const body = {
       model,
       max_tokens: req.maxOutputTokens ?? 2400,

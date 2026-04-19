@@ -52,7 +52,7 @@ Env vars:
 
 - `OPENAI_API_KEY` *or* `ANTHROPIC_API_KEY` — the LLM. Pick one.
 - `LLM_PROVIDER` — `openai` (default) or `anthropic`.
-- `LLM_MODEL` — e.g. `gpt-4o-mini`, `claude-3-5-sonnet-latest`.
+- `LLM_MODEL` — e.g. `claude-sonnet-4-5` (default), `gpt-4o`, `gpt-4o-mini`.
 - `FIRECRAWL_API_KEY` — enables real crawling. Without it the pipeline skips
   crawling and relies on fixtures / insufficient-evidence fallback.
 - `NEXT_PUBLIC_APP_URL` — used when constructing shareable microsite URLs
