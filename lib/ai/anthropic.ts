@@ -9,14 +9,14 @@ export const anthropicProvider: LlmProvider = {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY not set");
 
-    // Allow caller to override via req.model (not on LlmRequest yet — we tunnel
-    // it through a magic prefix on schemaName for now) OR via LLM_MODEL.
     const model = req.model || process.env.LLM_MODEL || "claude-sonnet-4-5";
     const body = {
       model,
       max_tokens: req.maxOutputTokens ?? 2400,
       temperature: req.temperature ?? 0.3,
-      system: req.system + "\n\nReturn a single valid JSON object with no markdown fences.",
+      system:
+        req.system +
+        "\n\nRespond with a single JSON object only. Do not wrap in markdown fences. Do not add any prose before or after the JSON.",
       messages: [{ role: "user", content: req.user }],
     };
 
@@ -38,24 +38,57 @@ export const anthropicProvider: LlmProvider = {
     const text = json.content?.find((b) => b.type === "text")?.text ?? "";
     if (!text) throw new Error(`Anthropic returned empty text for ${req.schemaName}`);
 
-    // Strip accidental markdown fences if any
-    const cleaned = text.trim().replace(/^```(?:json)?\n?/i, "").replace(/```$/i, "").trim();
+    const cleaned = extractJsonObject(text);
+    if (!cleaned) {
+      console.warn(`[anthropic ${req.schemaName}] could not find JSON in output:`, text.slice(0, 400));
+      throw new Error(`Anthropic returned non-JSON for ${req.schemaName}`);
+    }
 
     let parsed: unknown;
     try {
       parsed = JSON.parse(cleaned);
     } catch (err) {
+      console.warn(`[anthropic ${req.schemaName}] JSON.parse failed. First 400 chars:`, cleaned.slice(0, 400));
       throw new Error(`Anthropic returned non-JSON for ${req.schemaName}: ${String(err)}`);
     }
     const result = req.schema.safeParse(parsed);
     if (!result.success) {
-      throw new Error(
-        `Anthropic output failed schema (${req.schemaName}): ${result.error.issues
-          .slice(0, 3)
-          .map((i) => `${i.path.join(".")}: ${i.message}`)
-          .join("; ")}`,
-      );
+      const issues = result.error.issues.slice(0, 5).map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
+      console.warn(`[anthropic ${req.schemaName}] schema validation failed:`, issues);
+      throw new Error(`Anthropic output failed schema (${req.schemaName}): ${issues}`);
     }
     return result.data;
   },
 };
+
+// Extract the first top-level JSON object from an LLM response, tolerating
+// markdown fences and leading/trailing prose. Returns the substring suitable
+// for JSON.parse, or null if no balanced object was found.
+function extractJsonObject(raw: string): string | null {
+  // Fast path: fenced ```json blocks
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fenced) return fenced[1].trim();
+
+  // Slow path: scan for balanced braces, respecting strings + escapes.
+  const start = raw.indexOf("{");
+  if (start < 0) return null;
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+  for (let i = start; i < raw.length; i++) {
+    const ch = raw[i];
+    if (inString) {
+      if (escape) escape = false;
+      else if (ch === "\\") escape = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === "{") depth++;
+    else if (ch === "}") {
+      depth--;
+      if (depth === 0) return raw.slice(start, i + 1);
+    }
+  }
+  return null;
+}
