@@ -9,7 +9,9 @@ export const anthropicProvider: LlmProvider = {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error("ANTHROPIC_API_KEY not set");
 
-    const model = process.env.LLM_MODEL || "claude-sonnet-4-5";
+    // Allow caller to override via req.model (not on LlmRequest yet — we tunnel
+    // it through a magic prefix on schemaName for now) OR via LLM_MODEL.
+    const model = req.model || process.env.LLM_MODEL || "claude-sonnet-4-5";
     const body = {
       model,
       max_tokens: req.maxOutputTokens ?? 2400,

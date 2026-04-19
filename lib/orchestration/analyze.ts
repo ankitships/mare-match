@@ -121,7 +121,12 @@ export async function analyzeProspect(input: AnalyzeInput): Promise<AnalyzeResul
 
   if (!evidence) {
     const provider = getProvider();
-    if (provider.name === "mock") {
+    // If we have neither crawl content nor a fixture match nor an LLM, the
+    // only defensible answer is "insufficient evidence" — don't waste an
+    // LLM roundtrip on an empty prompt.
+    if (crawled.length === 0) {
+      evidence = buildInsufficientEvidence();
+    } else if (provider.name === "mock") {
       // No keys + no fixture match — fall back to a safe "insufficient evidence" payload
       evidence = buildInsufficientEvidence();
     } else {
@@ -147,6 +152,10 @@ export async function analyzeProspect(input: AnalyzeInput): Promise<AnalyzeResul
           user,
           schema: EvidencePayloadSchema,
           schemaName: "EvidencePayload",
+          // Evidence extraction is structured and factual — use the fast model
+          // (Haiku 4.5 for Anthropic) so analyze stays under ~12s end-to-end.
+          // Sonnet is reserved for the creative microsite + outreach writing.
+          model: process.env.LLM_MODEL_FAST || "claude-haiku-4-5-20251001",
           temperature: 0.25,
           maxOutputTokens: 2800,
         });

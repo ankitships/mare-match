@@ -24,7 +24,7 @@ export const openaiProvider: LlmProvider = {
   name: "openai",
   async completeJson<S extends ZodTypeAny>(req: LlmRequest<S>): Promise<z.infer<S>> {
     const client = await getClient();
-    const model = process.env.LLM_MODEL || "gpt-4o-mini";
+    const model = req.model || process.env.LLM_MODEL || "gpt-4o-mini";
 
     const resp = await client.chat.completions.create({
       model,

@@ -17,6 +17,7 @@ export interface LlmRequest<S extends ZodTypeAny> {
   schemaName: string;           // used as function/tool name for providers that need it
   maxOutputTokens?: number;
   temperature?: number;
+  model?: string;               // override LLM_MODEL for this one call (e.g. Haiku for speed)
 }
 
 export interface LlmProvider {
