@@ -8,6 +8,7 @@ import { CategoryTabs } from "@/components/internal/category-tabs";
 import { RedFlagsCard } from "@/components/internal/red-flags-card";
 import { ApprovalControls } from "@/components/internal/approval-controls";
 import { GenerateActions } from "@/components/internal/generate-actions";
+import { DeleteProspectButton } from "@/components/internal/delete-prospect-button";
 
 import { store } from "@/lib/db";
 import { explainScore } from "@/lib/scoring/engine";
@@ -48,7 +49,10 @@ export default async function ProspectReviewPage({ params }: { params: Promise<{
               {prospect.city ? ` · ${[prospect.city, prospect.state].filter(Boolean).join(", ")}` : null}
             </p>
           </div>
-          <GenerateActions prospectId={prospect.id} slug={prospect.slug} hasMicrosite={!!microsite} hasOutreach={!!outreach} />
+          <div className="flex flex-col items-end gap-2">
+            <GenerateActions prospectId={prospect.id} slug={prospect.slug} hasMicrosite={!!microsite} hasOutreach={!!outreach} />
+            <DeleteProspectButton prospectId={prospect.id} prospectName={prospect.name} />
+          </div>
         </div>
 
         {!score ? (

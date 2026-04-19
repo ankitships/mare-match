@@ -95,7 +95,7 @@ export function ProspectsList({ rows }: { rows: ProspectWithScore[] }) {
           <ul className="divide-y divide-border fade-in">
             {visible.map((p) => (
               <li key={p.id}>
-                <ProspectRow prospect={p} />
+                <ProspectRow prospect={p} showDelete />
               </li>
             ))}
           </ul>

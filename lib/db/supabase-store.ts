@@ -167,6 +167,14 @@ export const supabaseStore = {
     if (error) throw error;
   },
 
+  async deleteProspect(id: string): Promise<void> {
+    // Schema has `on delete cascade` on every child FK, so removing the
+    // parent row cleans up sources, scores, microsite, outreach, approvals,
+    // and versions in a single statement.
+    const { error } = await getClient().from("mare_prospects").delete().eq("id", id);
+    if (error) throw error;
+  },
+
   // Sources ------------------------------------------------------------------
   async saveSources(
     prospectId: string,

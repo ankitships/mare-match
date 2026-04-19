@@ -119,6 +119,28 @@ export const store = {
     }
   },
 
+  async deleteProspect(id: string): Promise<void> {
+    // Cascade: wipe the prospect and every related row across all files.
+    const [prospects, sources, scores, microsites, outreach, approvals, versions] = await Promise.all([
+      readJson<ProspectRecord>(FILES.prospects),
+      readJson<ProspectSource>(FILES.sources),
+      readJson<{ prospect_id: string }>(FILES.scores),
+      readJson<MicrositeRecord>(FILES.microsites),
+      readJson<OutreachAssets>(FILES.outreach),
+      readJson<ApprovalState>(FILES.approvals),
+      readJson<GenerationVersion>(FILES.versions),
+    ]);
+    await Promise.all([
+      writeJson(FILES.prospects, prospects.filter((p) => p.id !== id)),
+      writeJson(FILES.sources, sources.filter((s) => s.prospect_id !== id)),
+      writeJson(FILES.scores, scores.filter((s) => s.prospect_id !== id)),
+      writeJson(FILES.microsites, microsites.filter((m) => m.prospect_id !== id)),
+      writeJson(FILES.outreach, outreach.filter((o) => o.prospect_id !== id)),
+      writeJson(FILES.approvals, approvals.filter((a) => a.prospect_id !== id)),
+      writeJson(FILES.versions, versions.filter((v) => v.prospect_id !== id)),
+    ]);
+  },
+
   // Sources ------------------------------------------------------------------
   async saveSources(prospectId: string, sources: Array<Omit<ProspectSource, "id" | "prospect_id" | "created_at">>) {
     const rows = await readJson<ProspectSource>(FILES.sources);
