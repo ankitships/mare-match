@@ -168,7 +168,7 @@ export interface MicrositeRecord {
   mare_system_json: MicrositeMareSystemPoint[];
   implementation_json: MicrositeImplementationItem[];
   next_step_json: { cta_label: string; message: string; contact_name?: string; contact_email?: string };
-  theme_json: { accent_hex?: string; logo_url?: string };
+  theme_json: { accent_hex?: string; logo_url?: string; prospect_images?: string[] };
   why_different_body: string;
   published: boolean;
   created_at: string;

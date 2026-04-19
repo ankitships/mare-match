@@ -13,7 +13,7 @@
 
 import { randomUUID } from "node:crypto";
 
-import { crawlProspect, truncatePageContent } from "@/lib/crawl/firecrawl";
+import { crawlProspect, extractImageUrls, truncatePageContent } from "@/lib/crawl/firecrawl";
 import { getProvider } from "@/lib/ai/provider";
 import { buildEvidencePrompt } from "@/lib/prompts/evidence";
 import { EvidencePayloadSchema, type EvidencePayload } from "@/lib/schemas/evidence";
@@ -87,15 +87,18 @@ export async function analyzeProspect(input: AnalyzeInput): Promise<AnalyzeResul
   }
 
   if (crawled.length) {
+    const prospectImages = extractImageUrls(crawled);
     await store.saveSources(
       prospect.id,
-      crawled.map((p) => ({
+      crawled.map((p, i) => ({
         source_type: p.source_type,
         source_url: p.url,
         raw_content: p.markdown,
         parsed_content: p.markdown.slice(0, 8000),
         screenshot_url: p.screenshot_url,
-        metadata_json: { title: p.title },
+        // Attach extracted images to the first (homepage) source so the
+        // microsite generator can read them without a fresh crawl.
+        metadata_json: i === 0 ? { title: p.title, prospect_images: prospectImages } : { title: p.title },
       })),
     );
   }

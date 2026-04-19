@@ -4,20 +4,27 @@
 
 @layer base {
   :root {
-    --background: 42 40% 97%;             /* bone 50 */
-    --foreground: 32 10% 10%;             /* near charcoal */
+    /* MaRe brand tokens in HSL so Tailwind utilities stay composable.
+       Anchored to the official palette:
+       Light #e2e2de · Key #296167 · Extra Dark #2A2420 · Dark #3B3632 · Brown #653D24 */
+    --background: 55 6% 96%;              /* slightly warmer Light (page base) */
+    --foreground: 30 14% 14%;             /* Extra Dark */
 
-    --card: 0 0% 100%;
-    --card-foreground: 32 10% 10%;
+    --card: 0 0% 100%;                    /* Clear White */
+    --card-foreground: 30 14% 14%;
 
-    --muted: 38 24% 92%;
-    --muted-foreground: 32 8% 40%;
+    --muted: 60 6% 89%;                   /* Light tinted */
+    --muted-foreground: 30 8% 40%;
 
-    --border: 36 20% 88%;
-    --input: 36 20% 88%;
-    --ring: 34 32% 46%;                   /* brass */
+    --border: 60 6% 86%;
+    --input: 60 6% 86%;
+    --ring: 187 44% 28%;                  /* Key teal */
 
-    --radius: 0.75rem;
+    --brand-key: 187 44% 28%;             /* #296167 */
+    --brand-brown: 20 48% 27%;            /* #653D24 */
+    --brand-light: 55 6% 88%;             /* #e2e2de */
+
+    --radius: 0.5rem;
   }
 
   .dark {

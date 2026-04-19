@@ -238,3 +238,49 @@ export function truncatePageContent(page: CrawledPage, max = 3800): string {
   const body = page.markdown || page.html || "";
   return body.length > max ? `${body.slice(0, max)}\n…[truncated]` : body;
 }
+
+// Extract image URLs from crawled markdown. Filters out likely-decorative
+// assets (logos, icons, tiny images) so the microsite gallery only shows
+// the prospect's hero/interior/team photography.
+export function extractImageUrls(pages: CrawledPage[]): string[] {
+  const urls = new Set<string>();
+  for (const page of pages) {
+    const md = page.markdown ?? "";
+    // Markdown image syntax: ![alt](url "optional title")
+    const mdMatches = md.matchAll(/!\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g);
+    for (const m of mdMatches) urls.add(m[1]);
+
+    // Plain HTML img tags that sometimes survive Firecrawl's markdown pass
+    const htmlMatches = md.matchAll(/<img[^>]+src=["']([^"']+)["']/gi);
+    for (const m of htmlMatches) urls.add(m[1]);
+  }
+
+  const filtered: string[] = [];
+  for (const raw of urls) {
+    // Skip data URIs, relative paths, and non-image content
+    if (!/^https?:\/\//i.test(raw)) continue;
+    if (!/\.(jpe?g|png|webp|avif)(\?|$)/i.test(raw)) continue;
+
+    // Skip obvious UI/icon assets by filename heuristics
+    if (/\b(logo|icon|favicon|sprite|avatar|badge|spinner)\b/i.test(raw)) continue;
+    if (/\b(?:\d{2,3}x\d{2,3})\b/.test(raw) && /16x16|32x32|48x48|64x64/.test(raw)) continue;
+
+    filtered.push(raw);
+  }
+
+  // Dedupe by pathname (some sites serve the same asset from multiple hosts)
+  const seenByPath = new Set<string>();
+  const deduped: string[] = [];
+  for (const u of filtered) {
+    try {
+      const pathKey = new URL(u).pathname;
+      if (seenByPath.has(pathKey)) continue;
+      seenByPath.add(pathKey);
+      deduped.push(u);
+    } catch {
+      deduped.push(u);
+    }
+  }
+
+  return deduped.slice(0, 12);   // cap so we don't balloon the payload
+}

@@ -13,9 +13,9 @@ import type { ApprovalState } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const GATE_COPY: Record<string, { title: string; sub: string }> = {
-  fit_score: { title: "Fit score", sub: "Approve the scoring and recommendation" },
-  microsite: { title: "Microsite", sub: "Approve the external partner page" },
-  outreach: { title: "Outreach", sub: "Approve email / DM / postcard / opener" },
+  fit_score: { title: "Fit score", sub: "Sign off on the score" },
+  microsite: { title: "Microsite", sub: "Sign off on the partner page" },
+  outreach: { title: "Outreach", sub: "Sign off on the outreach drafts" },
 };
 
 type Gate = "fit_score" | "microsite" | "outreach";
@@ -45,7 +45,8 @@ export function ApprovalControls({
 
   const allApproved = state.fit_score_approved && state.microsite_approved && state.outreach_approved;
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/partner/${prospectSlug}` : "";
-  const approvedCount = Number(state.fit_score_approved) + Number(state.microsite_approved) + Number(state.outreach_approved);
+  const approvedCount =
+    Number(state.fit_score_approved) + Number(state.microsite_approved) + Number(state.outreach_approved);
 
   async function toggle(gate: Gate, value: boolean) {
     setPendingGate(gate);
@@ -58,7 +59,7 @@ export function ApprovalControls({
       const json = await res.json();
       if (json.ok) {
         setState(json.approval);
-        if (value) setNotice(`${GATE_COPY[gate].title} approved`);
+        if (value) setNotice(`${GATE_COPY[gate].title} signed off`);
         startTransition(() => router.refresh());
       } else {
         setNotice("Could not update approval");
@@ -93,9 +94,9 @@ export function ApprovalControls({
   }
 
   return (
-    <div className="card-surface p-6">
-      <div className="mb-4 flex items-baseline justify-between">
-        <h3 className="font-serif text-xl tracking-tight">Approval</h3>
+    <div className="card-surface p-7">
+      <div className="mb-5 flex items-baseline justify-between">
+        <h3 className="font-serif text-xl leading-tight tracking-tight text-mare-extra-dark">Approval</h3>
         {allApproved ? (
           <Badge variant="accent">Ready to send</Badge>
         ) : (
@@ -115,28 +116,30 @@ export function ApprovalControls({
             <li
               key={g}
               className={cn(
-                "flex items-center justify-between gap-3 rounded-md border px-3 py-2.5 transition-colors",
-                approved ? "border-accent-500/30 bg-accent-500/5" : "border-border",
+                "flex items-center justify-between gap-3 rounded-sm border px-4 py-3 transition-colors",
+                approved ? "border-mare-key/30 bg-mare-key/5" : "border-mare-light",
               )}
             >
-              <div>
-                <p className="text-sm font-medium text-charcoal-900">{GATE_COPY[g].title}</p>
-                <p className="text-[11px] text-charcoal-500">{GATE_COPY[g].sub}</p>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-mare-extra-dark">{GATE_COPY[g].title}</p>
+                <p className="font-display text-[10px] uppercase tracking-[0.18em] text-mare-dark/55">
+                  {GATE_COPY[g].sub}
+                </p>
               </div>
               <LoadingButton
                 size="sm"
                 variant={approved ? "accent" : "outline"}
                 loading={isPending}
-                loadingText={approved ? "Undoing" : "Approving"}
+                loadingText={approved ? "Undoing" : "Signing"}
                 disabled={disabled}
                 onClick={() => toggle(g, !approved)}
               >
                 {approved ? (
                   <>
-                    <Check className="h-3.5 w-3.5" /> Approved
+                    <Check className="h-3.5 w-3.5" /> Signed off
                   </>
                 ) : (
-                  "Approve"
+                  "Sign off"
                 )}
               </LoadingButton>
             </li>
@@ -146,9 +149,11 @@ export function ApprovalControls({
 
       {hasMicrosite && (
         <>
-          <div className="hairline my-5" />
+          <div className="hairline my-6" />
           <div className="space-y-3">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-charcoal-500">Private microsite</p>
+            <p className="font-display text-[10px] uppercase tracking-[0.22em] text-mare-dark/55">
+              Private microsite
+            </p>
             <div className="flex flex-wrap gap-2">
               <Link href={`/partner/${prospectSlug}`} target="_blank">
                 <Button variant="outline" size="sm">
@@ -176,17 +181,19 @@ export function ApprovalControls({
               </LoadingButton>
             </div>
             {!state.microsite_approved && (
-              <p className="text-[11px] text-charcoal-500">Approve the microsite to enable publishing.</p>
+              <p className="font-display text-[10px] uppercase tracking-[0.18em] text-mare-dark/55">
+                Sign off on the microsite to enable publishing.
+              </p>
             )}
           </div>
         </>
       )}
 
       {allApproved && (
-        <div className="mt-5 rounded-md border border-accent-500/30 bg-accent-500/5 p-3 fade-in">
-          <p className="text-sm font-medium text-accent-600">All three gates approved.</p>
-          <p className="mt-1 text-xs leading-relaxed text-charcoal-700">
-            Copy the share link above, or hand off to the partnerships team. Nothing is auto-sent.
+        <div className="mt-6 rounded-sm border border-mare-key/30 bg-mare-key/5 p-4 fade-in">
+          <p className="text-sm font-medium text-mare-key">All three signed off.</p>
+          <p className="mt-1 text-[13px] leading-[1.65] text-mare-dark/80">
+            Share the link, or hand the page off to the team. Nothing is auto-sent.
           </p>
         </div>
       )}

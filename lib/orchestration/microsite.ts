@@ -101,6 +101,13 @@ export async function generateMicrosite(opts: {
   const now = new Date().toISOString();
   const existing = await store.getMicrositeByProspect(prospect.id);
 
+  // Pull prospect-owned imagery off the saved sources so the microsite can
+  // display them in the Why-You-Were-Selected gallery.
+  const sources = await store.listSources(prospect.id);
+  const prospectImages = sources
+    .flatMap((s) => ((s.metadata_json as { prospect_images?: string[] } | undefined)?.prospect_images ?? []))
+    .slice(0, 6);
+
   const record: MicrositeRecord = {
     id: existing?.id ?? randomUUID(),
     prospect_id: prospect.id,
@@ -111,7 +118,7 @@ export async function generateMicrosite(opts: {
     mare_system_json: payload.mare_system,
     implementation_json: payload.implementation,
     next_step_json: { cta_label: payload.next_step.cta_label, message: payload.next_step.message },
-    theme_json: payload.theme ?? {},
+    theme_json: { ...(payload.theme ?? {}), prospect_images: prospectImages },
     why_different_body: payload.why_different_body,
     published: existing?.published ?? false,
     created_at: existing?.created_at ?? now,

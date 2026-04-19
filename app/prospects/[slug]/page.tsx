@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExternalLink } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 import { TopNav } from "@/components/internal/top-nav";
 import { ScoreHero } from "@/components/internal/score-hero";
@@ -30,44 +30,66 @@ export default async function ProspectReviewPage({ params }: { params: Promise<{
   return (
     <>
       <TopNav />
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-6 pb-24 pt-10">
         {/* Breadcrumb */}
-        <div className="mb-6 flex items-baseline justify-between">
-          <div>
-            <Link
-              href="/prospects"
-              className="text-[11px] uppercase tracking-[0.18em] text-charcoal-500 hover:text-charcoal-900"
-            >
-              Prospects
-            </Link>
-            <h1 className="mt-2 font-serif text-4xl tracking-tight text-charcoal-900">{prospect.name}</h1>
-            <p className="mt-1 text-sm text-charcoal-600">
-              <a href={prospect.website_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-charcoal-900">
+        <Link
+          href="/prospects"
+          className="font-display text-[10px] font-medium uppercase tracking-[0.22em] text-mare-dark/55 hover:text-mare-extra-dark"
+        >
+          ← Prospects
+        </Link>
+
+        {/* Identity block */}
+        <section className="mt-5 grid gap-6 md:grid-cols-[1fr,auto] md:items-end">
+          <div className="min-w-0">
+            <h1 className="font-serif text-[44px] font-medium leading-[1.1] tracking-tight text-mare-extra-dark">
+              {prospect.name}
+            </h1>
+            <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-mare-dark/75">
+              <a
+                href={prospect.website_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-mare-key hover:text-mare-brown"
+              >
                 {prospect.website_url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
-                <ExternalLink className="h-3 w-3" />
+                <ArrowUpRight className="h-3 w-3" />
               </a>
-              {prospect.city ? ` · ${[prospect.city, prospect.state].filter(Boolean).join(", ")}` : null}
+              {[prospect.city, prospect.state].filter(Boolean).length > 0 && (
+                <>
+                  <span className="text-mare-dark/30">·</span>
+                  <span>{[prospect.city, prospect.state].filter(Boolean).join(", ")}</span>
+                </>
+              )}
             </p>
           </div>
-          <div className="flex flex-col items-end gap-2">
-            <GenerateActions prospectId={prospect.id} slug={prospect.slug} hasMicrosite={!!microsite} hasOutreach={!!outreach} />
+
+          <div className="flex flex-col items-start gap-3 md:items-end">
+            <GenerateActions
+              prospectId={prospect.id}
+              slug={prospect.slug}
+              hasMicrosite={!!microsite}
+              hasOutreach={!!outreach}
+            />
             <DeleteProspectButton prospectId={prospect.id} prospectName={prospect.name} />
           </div>
-        </div>
+        </section>
+
+        <div className="hairline mt-10" />
 
         {!score ? (
-          <div className="card-surface p-10 text-sm text-charcoal-600">
-            Analysis has not completed yet. Try running intake again.
+          <div className="card-surface mt-12 p-12 text-sm text-mare-dark/75">
+            Analysis hasn't completed yet. Try running intake again.
           </div>
         ) : (
           <>
-            {/* Score hero */}
-            <ScoreHero score={score} explain={explainScore(score)} />
+            <div className="mt-12">
+              <ScoreHero score={score} explain={explainScore(score)} />
+            </div>
 
-            {/* Evidence + red flags */}
-            <div className="mt-10 grid gap-8 lg:grid-cols-[2fr,1fr]">
+            <div className="mt-16 grid gap-10 lg:grid-cols-[2fr,1fr]">
               <CategoryTabs score={score} />
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <RedFlagsCard score={score} />
                 <ApprovalControls
                   prospectId={prospect.id}

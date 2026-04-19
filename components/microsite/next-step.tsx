@@ -1,42 +1,62 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export function MicrositeNextStep({ ctaLabel, message }: { ctaLabel: string; message: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <section className="border-t border-border/60 bg-charcoal-900 text-bone-50">
-      <div className="mx-auto max-w-5xl px-8 py-24">
-        <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-accent-500">Next step</p>
-        <h2 className="mt-5 max-w-3xl font-serif text-4xl leading-[1.1] tracking-tight text-balance">
+    <section className="relative overflow-hidden bg-mare-key text-bone-50">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-24 bottom-[-20%] h-[160%] w-[520px] opacity-[0.15]"
+      >
+        <Image src="/brand/pictorial-mark.png" alt="" fill sizes="520px" className="object-contain" />
+      </div>
+      <div className="mx-auto max-w-5xl px-8 py-28">
+        <p className="font-display text-[11px] font-medium uppercase tracking-[0.28em] text-water-50/70">
+          Next step
+        </p>
+        <h2 className="mt-6 max-w-3xl font-serif text-4xl font-medium leading-[1.1] tracking-tight text-bone-50 text-balance sm:text-[52px]">
           {message}
         </h2>
 
-        <div className="mt-10">
+        <div className="mt-12 flex flex-wrap items-center gap-6">
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button size="lg" variant="accent">
+              <Button
+                size="lg"
+                className="bg-mare-brown text-bone-50 hover:bg-[#4d2e1b] font-display tracking-wide"
+              >
                 {ctaLabel}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Book a conversation with MaRe</DialogTitle>
+                <DialogTitle>A quiet reply is enough.</DialogTitle>
                 <DialogDescription>
-                  A short, private exchange with the partnerships team. No obligation.
+                  Reply to the email you received from the MaRe team.
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-3 text-sm text-charcoal-700">
-                <p>Reply directly to the email you received from the MaRe team.</p>
-                <p className="text-xs text-charcoal-500">
-                  This page is private and prepared specifically for you. It is not indexed or shared more broadly.
-                </p>
-              </div>
+              <p className="text-xs text-mare-dark/60">
+                This page is private. It isn't indexed or shared beyond you.
+              </p>
             </DialogContent>
           </Dialog>
+
+          <p className="font-display text-[11px] uppercase tracking-[0.24em] text-water-50/60">
+            No form · No meeting link · Just a note
+          </p>
         </div>
       </div>
     </section>

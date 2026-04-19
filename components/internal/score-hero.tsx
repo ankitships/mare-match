@@ -8,61 +8,77 @@ const RECOMMENDATION_LABEL: Record<string, string> = {
   not_a_fit: "Not a fit",
 };
 
-const REVENUE_LABEL: Record<string, string> = {
-  likely_above_1m: "Likely above $1M",
-  possibly_above_1m: "Possibly above $1M",
-  insufficient_evidence: "Insufficient evidence",
-  likely_below_target: "Likely below target",
+const REVENUE_BANDS: Record<string, { label: string; sentence: string }> = {
+  likely_above_1m: { label: "Likely above $1M", sentence: "Revenue likely above the $1M target." },
+  possibly_above_1m: { label: "Possibly above $1M", sentence: "Revenue may reach the $1M target." },
+  insufficient_evidence: { label: "Insufficient evidence", sentence: "Too little signal to call it yet." },
+  likely_below_target: { label: "Likely below target", sentence: "Revenue likely below the $1M target." },
 };
 
 export function ScoreHero({ score, explain }: { score: ProspectScore; explain: string[] }) {
+  const band = REVENUE_BANDS[score.revenue_band] ?? REVENUE_BANDS.insufficient_evidence;
+
   return (
     <section className="card-surface overflow-hidden">
-      <div className="grid gap-8 p-8 md:grid-cols-[auto,1fr] md:p-10">
+      <div className="grid gap-10 p-10 lg:grid-cols-[260px,1fr] lg:gap-14 lg:p-12">
         {/* Big number */}
-        <div className="flex min-w-[220px] flex-col justify-between">
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-charcoal-500">
-            Luxury fit score
+        <div className="flex flex-col justify-between">
+          <p className="font-display text-[10px] font-medium uppercase tracking-[0.26em] text-mare-dark/60">
+            Fit score
           </p>
-          <div className="flex items-baseline gap-2">
-            <span className="font-serif text-[96px] leading-none tracking-tighter text-charcoal-900 tabular-nums">
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="font-serif text-[104px] font-medium leading-[0.85] tracking-tight text-mare-extra-dark tabular-nums">
               {Math.round(score.total)}
             </span>
-            <span className="font-serif text-3xl text-charcoal-500">/100</span>
+            <span className="font-serif text-3xl text-mare-dark/40">/100</span>
           </div>
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <Badge variant={score.recommendation === "strong_fit" ? "accent" : score.recommendation === "worth_reviewing" ? "default" : "outline"}>
+          <div className="mt-6 flex flex-wrap items-center gap-2">
+            <Badge
+              variant={
+                score.recommendation === "strong_fit"
+                  ? "accent"
+                  : score.recommendation === "worth_reviewing"
+                  ? "default"
+                  : "outline"
+              }
+            >
               {RECOMMENDATION_LABEL[score.recommendation]}
             </Badge>
             <Badge variant="muted">Confidence · {score.confidence}</Badge>
           </div>
         </div>
 
-        {/* Subcategory bar chart */}
+        {/* Subcategory breakdown */}
         <div>
-          <div className="mb-5 flex items-baseline justify-between">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-charcoal-500">
+          <div className="mb-6 flex items-baseline justify-between">
+            <p className="font-display text-[10px] font-medium uppercase tracking-[0.26em] text-mare-dark/60">
               Category breakdown
             </p>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-charcoal-500">Weighted · 0–100</p>
+            <p className="font-display text-[10px] font-medium uppercase tracking-[0.22em] text-mare-dark/45">
+              Weighted · 0–100
+            </p>
           </div>
 
-          <ul className="space-y-3">
+          <ul className="space-y-3.5">
             {score.scored_categories.map((c) => {
-              const pct = (c.weighted_subscore / c.weight) * 100; // 0..100 within its own cap
+              const pct = (c.weighted_subscore / c.weight) * 100;
               return (
-                <li key={c.category} className="grid grid-cols-[1fr,auto,48px] items-center gap-4 text-sm">
-                  <span className="truncate text-charcoal-700">{CATEGORY_LABELS[c.category]}</span>
-                  <div className="relative h-[6px] w-44 overflow-hidden rounded-full bg-charcoal-900/8">
+                <li key={c.category} className="grid grid-cols-[1fr,11rem,56px] items-center gap-4 text-sm">
+                  <span className="truncate text-mare-dark/85">{CATEGORY_LABELS[c.category]}</span>
+                  <div className="relative h-[5px] w-full overflow-hidden rounded-full bg-mare-extra-dark/5">
                     <div
                       className={cn(
-                        "absolute left-0 top-0 h-full rounded-full",
-                        c.raw_subscore >= 7 ? "bg-accent-500" : c.raw_subscore >= 4 ? "bg-charcoal-600" : "bg-charcoal-800/30",
+                        "absolute left-0 top-0 h-full rounded-full transition-all",
+                        c.raw_subscore >= 7
+                          ? "bg-mare-key"
+                          : c.raw_subscore >= 4
+                          ? "bg-mare-dark/50"
+                          : "bg-mare-extra-dark/15",
                       )}
                       style={{ width: `${Math.max(3, Math.min(100, pct))}%` }}
                     />
                   </div>
-                  <span className="text-right font-mono text-xs tabular-nums text-charcoal-900">
+                  <span className="text-right font-display text-[11px] tabular-nums text-mare-extra-dark">
                     {c.weighted_subscore.toFixed(1)}/{c.weight}
                   </span>
                 </li>
@@ -70,17 +86,25 @@ export function ScoreHero({ score, explain }: { score: ProspectScore; explain: s
             })}
           </ul>
 
-          <div className="hairline my-6" />
+          <div className="hairline my-8" />
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-8 md:grid-cols-2">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-charcoal-500">Revenue band</p>
-              <p className="mt-1 font-serif text-xl text-charcoal-900">{REVENUE_LABEL[score.revenue_band]}</p>
-              <p className="mt-1 text-xs text-charcoal-500">Confidence · {score.revenue_confidence}</p>
+              <p className="font-display text-[10px] font-medium uppercase tracking-[0.24em] text-mare-dark/60">
+                Revenue
+              </p>
+              <p className="mt-2 font-serif text-xl leading-tight tracking-tight text-mare-extra-dark">
+                {band.sentence}
+              </p>
+              <p className="mt-2 font-display text-[10px] uppercase tracking-[0.2em] text-mare-dark/50">
+                Confidence · {score.revenue_confidence}
+              </p>
             </div>
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-charcoal-500">How this was computed</p>
-              <ul className="mt-1 space-y-0.5 text-xs leading-relaxed text-charcoal-600">
+              <p className="font-display text-[10px] font-medium uppercase tracking-[0.24em] text-mare-dark/60">
+                How this was computed
+              </p>
+              <ul className="mt-2 space-y-1 text-[12px] leading-relaxed text-mare-dark/75">
                 {explain.map((e, i) => (
                   <li key={i}>· {e}</li>
                 ))}

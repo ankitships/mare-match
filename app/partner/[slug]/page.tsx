@@ -42,7 +42,10 @@ export default async function PartnerPage({ params }: { params: Promise<{ slug: 
         state={prospect.state}
       />
 
-      <MicrositeWhySelected reasons={microsite.why_selected_json} />
+      <MicrositeWhySelected
+        reasons={microsite.why_selected_json}
+        imageUrls={microsite.theme_json?.prospect_images ?? []}
+      />
 
       <MicrositeMareSystem points={microsite.mare_system_json} />
 
