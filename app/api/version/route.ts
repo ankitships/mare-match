@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { store } from "@/lib/db/store";
+import { store } from "@/lib/db";
 
 export const runtime = "nodejs";
 

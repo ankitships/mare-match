@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { TopNav } from "@/components/internal/top-nav";
 import { Badge } from "@/components/ui/badge";
-import { store } from "@/lib/db/store";
+import { store } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 

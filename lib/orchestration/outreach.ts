@@ -5,7 +5,7 @@
 import { getProvider } from "@/lib/ai/provider";
 import { buildOutreachPrompt } from "@/lib/prompts/outreach";
 import { OutreachPayloadSchema, detectBannedPhrases, type OutreachPayload } from "@/lib/schemas/outreach";
-import { store } from "@/lib/db/store";
+import { store } from "@/lib/db";
 import type { OutreachAssets, ProspectRecord, ProspectScore } from "@/lib/types";
 
 function fallbackPayload(prospect: ProspectRecord, score: ProspectScore, micrositeUrl: string): OutreachPayload {

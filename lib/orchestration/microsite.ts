@@ -6,7 +6,7 @@ import { randomUUID } from "node:crypto";
 import { getProvider } from "@/lib/ai/provider";
 import { buildMicrositePrompt } from "@/lib/prompts/microsite";
 import { MicrositePayloadSchema, type MicrositePayload } from "@/lib/schemas/microsite";
-import { store } from "@/lib/db/store";
+import { store } from "@/lib/db";
 import type { MicrositeRecord, ProspectRecord, ProspectScore } from "@/lib/types";
 
 // Build a safe fallback microsite payload when no LLM is available

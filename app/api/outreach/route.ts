@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { store } from "@/lib/db/store";
+import { store } from "@/lib/db";
 import { generateOutreach } from "@/lib/orchestration/outreach";
 
 export const runtime = "nodejs";

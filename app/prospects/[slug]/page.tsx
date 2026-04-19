@@ -9,7 +9,7 @@ import { RedFlagsCard } from "@/components/internal/red-flags-card";
 import { ApprovalControls } from "@/components/internal/approval-controls";
 import { GenerateActions } from "@/components/internal/generate-actions";
 
-import { store } from "@/lib/db/store";
+import { store } from "@/lib/db";
 import { explainScore } from "@/lib/scoring/engine";
 
 export const dynamic = "force-dynamic";

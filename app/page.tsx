@@ -3,7 +3,7 @@ import { TopNav } from "@/components/internal/top-nav";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { IntakeForm } from "@/components/internal/intake-form";
-import { store } from "@/lib/db/store";
+import { store } from "@/lib/db";
 import { ensureSeeded } from "@/lib/db/auto-seed";
 
 export const dynamic = "force-dynamic";

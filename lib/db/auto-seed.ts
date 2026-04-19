@@ -3,7 +3,7 @@
 // Vercel instance. No-op locally once seed has been run.
 // ============================================================================
 
-import { store } from "./store";
+import { store } from "./index";
 import { analyzeProspect } from "@/lib/orchestration/analyze";
 import { generateMicrosite } from "@/lib/orchestration/microsite";
 import { generateOutreach } from "@/lib/orchestration/outreach";

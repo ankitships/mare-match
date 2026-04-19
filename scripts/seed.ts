@@ -8,7 +8,7 @@ import path from "node:path";
 import { analyzeProspect } from "../lib/orchestration/analyze";
 import { generateMicrosite } from "../lib/orchestration/microsite";
 import { generateOutreach } from "../lib/orchestration/outreach";
-import { store } from "../lib/db/store";
+import { store } from "../lib/db";
 
 process.env.USE_FIXTURES = "1";
 

@@ -18,7 +18,7 @@ import { getProvider } from "@/lib/ai/provider";
 import { buildEvidencePrompt } from "@/lib/prompts/evidence";
 import { EvidencePayloadSchema, type EvidencePayload } from "@/lib/schemas/evidence";
 import { computeScore } from "@/lib/scoring/engine";
-import { store } from "@/lib/db/store";
+import { store } from "@/lib/db";
 import { slugify } from "@/lib/utils";
 import { pickFixture, type FixtureFile } from "@/lib/fixtures";
 import type { ProspectRecord } from "@/lib/types";

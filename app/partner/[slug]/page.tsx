@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-import { store } from "@/lib/db/store";
+import { store } from "@/lib/db";
 import { MicrositeHero } from "@/components/microsite/hero";
 import { MicrositeWhySelected } from "@/components/microsite/why-selected";
 import { MicrositeMareSystem } from "@/components/microsite/mare-system";

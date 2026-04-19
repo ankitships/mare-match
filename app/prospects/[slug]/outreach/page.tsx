@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { TopNav } from "@/components/internal/top-nav";
 import { OutreachStudio } from "@/components/outreach/studio";
-import { store } from "@/lib/db/store";
+import { store } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
