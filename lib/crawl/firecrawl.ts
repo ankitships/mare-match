@@ -144,6 +144,55 @@ function normalize(u: string): string {
   }
 }
 
+// Plain-HTTP fallback for sites Firecrawl can't render. We fetch the raw HTML,
+// strip tags, and hand the resulting text to the same evidence extractor. Not
+// as rich as Firecrawl's parser but sufficient for the LLM to extract signals.
+async function plainFetch(url: string): Promise<CrawledPage | null> {
+  try {
+    const res = await fetch(url, {
+      signal: timeoutSignal(PER_CALL_TIMEOUT_MS),
+      headers: {
+        // Use a realistic UA so sites don't block us as a bot
+        "user-agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15 MaReMatchBot/1.0",
+        accept: "text/html,application/xhtml+xml",
+      },
+      redirect: "follow",
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+    if (!html) return null;
+
+    // Extract <title> for metadata
+    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+    const title = titleMatch?.[1]?.trim();
+
+    // Strip scripts/styles/nav/footer blocks, then tags
+    const stripped = html
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
+      .replace(/<svg[\s\S]*?<\/svg>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&quot;/g, '"')
+      .replace(/&#\d+;/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (stripped.length < 100) return null; // not enough signal
+    return {
+      url,
+      source_type: inferSourceType(url),
+      markdown: stripped.slice(0, 8000),
+      title,
+    };
+  } catch {
+    return null;
+  }
+}
+
 // ----------------------------------------------------------------------------
 // Public — crawl a prospect and return structured source records
 // ----------------------------------------------------------------------------
@@ -151,17 +200,23 @@ export async function crawlProspect(params: {
   website_url: string;
   instagram_url?: string;
 }): Promise<CrawledPage[]> {
-  if (!process.env.FIRECRAWL_API_KEY) return [];
+  const hasFirecrawl = !!process.env.FIRECRAWL_API_KEY;
 
   // Fire the homepage scrape and the site map in parallel — both only need
   // the root URL, and we don't want the map call to block the homepage scrape.
-  const [homepage, links] = await Promise.all([
-    scrape(params.website_url),
-    mapSite(params.website_url),
-  ]);
+  const [homepage, links] = hasFirecrawl
+    ? await Promise.all([scrape(params.website_url), mapSite(params.website_url)])
+    : [null, [] as string[]];
 
   const pages: CrawledPage[] = [];
   if (homepage) pages.push({ ...homepage, source_type: "homepage" });
+
+  // If Firecrawl couldn't render the homepage, fall back to a plain fetch so
+  // the analysis still has something to work with.
+  if (!homepage) {
+    const plain = await plainFetch(params.website_url);
+    if (plain) pages.push({ ...plain, source_type: "homepage" });
+  }
 
   // Kick off the relevant extra pages in parallel, bounded by MAX_EXTRA_PAGES.
   const relevant = selectRelevantLinks(params.website_url, links);

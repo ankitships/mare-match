@@ -206,10 +206,10 @@ function buildInsufficientEvidence(): EvidencePayload {
       confidence: "low" as const,
       evidence: [],
       missing_data_note:
-        "No evidence extracted — configure FIRECRAWL_API_KEY and an LLM key, or add this salon to fixtures.",
+        "The site couldn't be read automatically — likely bot protection or a render-heavy front end. Try pasting the public Instagram URL as well, or brief the team manually.",
     })),
     hard_fail_flags: [],
-    summary_note: "Insufficient evidence — analysis skipped.",
+    summary_note: "Insufficient evidence — the site blocked automated reading. A human review is advised.",
   };
 }
 
