@@ -64,6 +64,19 @@ export const store = {
     return rows.sort((a, b) => (a.created_at > b.created_at ? -1 : 1));
   },
 
+  async listProspectsWithScores(): Promise<Array<ProspectRecord & { score: ProspectScore | null }>> {
+    const prospects = await readJson<ProspectRecord>(FILES.prospects);
+    const allScores = await readJson<{ prospect_id: string; score: ProspectScore; created_at: string }>(FILES.scores);
+    const latestByProspect = new Map<string, ProspectScore>();
+    // scores array is prepended on save, so the first occurrence is latest
+    for (const row of allScores) {
+      if (!latestByProspect.has(row.prospect_id)) latestByProspect.set(row.prospect_id, row.score);
+    }
+    return prospects
+      .map((p) => ({ ...p, score: latestByProspect.get(p.id) ?? null }))
+      .sort((a, b) => (a.created_at > b.created_at ? -1 : 1));
+  },
+
   async getProspectBySlug(slug: string): Promise<ProspectRecord | undefined> {
     const rows = await readJson<ProspectRecord>(FILES.prospects);
     return rows.find((r) => r.slug === slug);

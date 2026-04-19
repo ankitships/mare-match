@@ -80,6 +80,27 @@ export const supabaseStore = {
     return (data ?? []) as ProspectRecord[];
   },
 
+  async listProspectsWithScores(): Promise<Array<ProspectRecord & { score: ProspectScore | null }>> {
+    const db = getClient();
+    const [{ data: prospects, error: pErr }, { data: scores, error: sErr }] = await Promise.all([
+      db.from("mare_prospects").select("*").order("created_at", { ascending: false }),
+      db
+        .from("mare_prospect_scores")
+        .select("prospect_id, scoring_json, created_at")
+        .order("created_at", { ascending: false }),
+    ]);
+    if (pErr) throw pErr;
+    if (sErr) throw sErr;
+    const latestByProspect = new Map<string, ProspectScore>();
+    for (const s of (scores ?? []) as Array<{ prospect_id: string; scoring_json: ProspectScore }>) {
+      if (!latestByProspect.has(s.prospect_id)) latestByProspect.set(s.prospect_id, s.scoring_json);
+    }
+    return ((prospects ?? []) as ProspectRecord[]).map((p) => ({
+      ...p,
+      score: latestByProspect.get(p.id) ?? null,
+    }));
+  },
+
   async getProspectBySlug(slug: string): Promise<ProspectRecord | undefined> {
     const { data, error } = await getClient().from("mare_prospects").select("*").eq("slug", slug).maybeSingle();
     if (error) throw error;
