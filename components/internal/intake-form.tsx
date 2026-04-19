@@ -31,7 +31,10 @@ export function IntakeForm() {
   const [detail, setDetail] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
 
-  async function onSubmit(formData: FormData) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+
     setLoading(true);
     setError(null);
     const website_url = String(formData.get("website_url") || "").trim();
@@ -69,7 +72,7 @@ export function IntakeForm() {
 
   return (
     <div className="space-y-5">
-      <form action={onSubmit} className={loading ? "pointer-events-none opacity-60 transition-opacity" : "space-y-5"}>
+      <form onSubmit={handleSubmit} className={loading ? "pointer-events-none opacity-60 transition-opacity" : "space-y-5"}>
         <div className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="website_url">Website URL *</Label>
