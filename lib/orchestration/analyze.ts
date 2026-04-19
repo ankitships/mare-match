@@ -157,7 +157,9 @@ export async function analyzeProspect(input: AnalyzeInput): Promise<AnalyzeResul
           // Sonnet is reserved for the creative microsite + outreach writing.
           model: process.env.LLM_MODEL_FAST || "claude-haiku-4-5-20251001",
           temperature: 0.25,
-          maxOutputTokens: 2800,
+          // Haiku 4.5 is chatty when describing 9 categories of evidence.
+          // 2800 tokens often truncated mid-object for richer salons.
+          maxOutputTokens: 5000,
         });
       } catch (err) {
         console.warn("[analyze] evidence LLM failed, falling back:", err);
