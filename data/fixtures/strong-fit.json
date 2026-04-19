@@ -1,0 +1,100 @@
+{
+  "prospect": {
+    "name": "Desange Miami",
+    "slug": "desange-miami",
+    "website_url": "https://desangesalon.example",
+    "instagram_url": "https://instagram.com/desangesalon",
+    "city": "Miami",
+    "state": "FL",
+    "notes": "Editorial Italian coiffeur; Design District flagship."
+  },
+  "evidence_payload": {
+    "categories": [
+      {
+        "category": "premium_aesthetic",
+        "score_hint": 9.4,
+        "confidence": "high",
+        "evidence": [
+          { "claim": "Editorial black-and-white photography, restrained palette, serif typography.", "source_type": "homepage", "source_url": "https://desangesalon.example", "excerpt": "Interiors rendered in travertine and brushed brass; zero discount messaging anywhere on site.", "confidence": "high" },
+          { "claim": "Instagram grid reads like a magazine spread — couture references, in-salon shoots with stylists in tailored uniforms.", "source_type": "instagram", "source_url": "https://instagram.com/desangesalon", "excerpt": "Editorial-grade image style consistent across 60+ recent posts.", "confidence": "high" },
+          { "claim": "Salon interior photography reveals private suites with curated art, layered lighting, and upholstered seating.", "source_type": "screenshot", "confidence": "medium" }
+        ],
+        "missing_data_note": ""
+      },
+      {
+        "category": "service_sophistication",
+        "score_hint": 8.9,
+        "confidence": "high",
+        "evidence": [
+          { "claim": "Menu organized as rituals (not à-la-carte), each framed with a narrative description.", "source_type": "services_page", "source_url": "https://desangesalon.example/services", "excerpt": "“The Desange Signature Ritual — a 90-minute immersion beginning with a bespoke scalp consultation.”", "confidence": "high" },
+          { "claim": "Offers a dedicated scalp & hair wellness menu distinct from cutting/color.", "source_type": "services_page", "confidence": "high" }
+        ]
+      },
+      {
+        "category": "retail_sophistication",
+        "score_hint": 8.2,
+        "confidence": "medium",
+        "evidence": [
+          { "claim": "Carries Oribe, Christophe Robin, and a small curated Italian line. Retail shelf visible above shampoo area.", "source_type": "screenshot", "confidence": "medium" },
+          { "claim": "Dedicated 'Home Ritual' page framing retail as care continuity rather than upsell.", "source_type": "about_page", "source_url": "https://desangesalon.example/home-ritual", "confidence": "medium" }
+        ]
+      },
+      {
+        "category": "wellness_adjacency",
+        "score_hint": 9.0,
+        "confidence": "high",
+        "evidence": [
+          { "claim": "Explicit scalp-wellness framing: 'treat the scalp as you would the skin.'", "source_type": "services_page", "excerpt": "Scalp treatments positioned alongside cutting/color as core offerings, not add-ons.", "confidence": "high" },
+          { "claim": "Founder Q&A references a multi-year practice rooted in Italian hair care philosophy.", "source_type": "about_page", "confidence": "medium" }
+        ]
+      },
+      {
+        "category": "clientele_affluence",
+        "score_hint": 9.2,
+        "confidence": "high",
+        "evidence": [
+          { "claim": "Design District Miami address — adjacent to Hermès, Dior, Bulgari flagships.", "source_type": "contact_page", "confidence": "high" },
+          { "claim": "Pricing from $160 for cut, $420+ for signature color.", "source_type": "pricing_page", "confidence": "high" },
+          { "claim": "Reviews reference repeat visits during Art Basel and Miami Swim Week; named stylists receive specific praise.", "source_type": "reviews", "excerpt": "“Worth every flight from Paris — Luca is a true artist.”", "confidence": "high" }
+        ]
+      },
+      {
+        "category": "operational_fit",
+        "score_hint": 8.1,
+        "confidence": "medium",
+        "evidence": [
+          { "claim": "Flagship footprint appears ~3,200 sq ft with private rooms visible in interior photography.", "source_type": "screenshot", "confidence": "medium" },
+          { "claim": "Already offers wash-house services in a dedicated rear area with plumbing.", "source_type": "screenshot", "confidence": "medium" }
+        ],
+        "missing_data_note": "Interior dimensions not explicitly published; a site visit would confirm room availability."
+      },
+      {
+        "category": "scale_signals",
+        "score_hint": 7.5,
+        "confidence": "medium",
+        "evidence": [
+          { "claim": "Single flagship, but team of 14 stylists and a named director.", "source_type": "about_page", "confidence": "medium" },
+          { "claim": "350+ Google reviews at 4.9 avg; steady press coverage in Vogue and Ocean Drive.", "source_type": "reviews", "confidence": "high" }
+        ]
+      },
+      {
+        "category": "revenue_likelihood",
+        "score_hint": 8.6,
+        "confidence": "high",
+        "evidence": [
+          { "claim": "Team size × average ticket × booking density suggests revenue comfortably above the $1M threshold.", "source_type": "metadata", "confidence": "high" }
+        ]
+      },
+      {
+        "category": "exclusivity_fit",
+        "score_hint": 9.1,
+        "confidence": "high",
+        "evidence": [
+          { "claim": "Brand feels mutually elevating — no mass-market cues, no groupon history, visible editorial discipline.", "source_type": "homepage", "confidence": "high" }
+        ]
+      }
+    ],
+    "hard_fail_flags": [],
+    "summary_note": "Strong alignment across aesthetic, wellness, and affluence signals. Operational confirmation via site visit advised."
+  }
+}

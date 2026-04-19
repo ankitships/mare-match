@@ -1,0 +1,94 @@
+{
+  "prospect": {
+    "name": "Rosano Ferretti NYC",
+    "slug": "rosano-ferretti-nyc",
+    "website_url": "https://rosanoferretti-nyc.example",
+    "instagram_url": "https://instagram.com/rosanoferretti_nyc",
+    "city": "New York",
+    "state": "NY",
+    "notes": "Upscale Midtown townhouse; site feels dated."
+  },
+  "evidence_payload": {
+    "categories": [
+      {
+        "category": "premium_aesthetic",
+        "score_hint": 6.4,
+        "confidence": "medium",
+        "evidence": [
+          { "claim": "Strong physical interior — marble, brass, curated art. But website design is visibly dated (Flash-era layout).", "source_type": "homepage", "confidence": "medium" },
+          { "claim": "Instagram grid is mixed — some editorial shots, some smartphone snaps with inconsistent lighting.", "source_type": "instagram", "confidence": "medium" }
+        ],
+        "missing_data_note": "Dated web presence undersells what appears to be a genuinely premium physical salon."
+      },
+      {
+        "category": "service_sophistication",
+        "score_hint": 7.2,
+        "confidence": "medium",
+        "evidence": [
+          { "claim": "Menu includes signature 'Metodo Rosano' treatments — a named proprietary ritual.", "source_type": "services_page", "excerpt": "Metodo Rosano — a natural, curl-by-curl dry cut developed over 25 years.", "confidence": "high" }
+        ]
+      },
+      {
+        "category": "retail_sophistication",
+        "score_hint": 5.8,
+        "confidence": "low",
+        "evidence": [
+          { "claim": "Retail mentioned briefly; no dedicated product page.", "source_type": "homepage", "confidence": "low" }
+        ],
+        "missing_data_note": "Retail footprint unclear from public materials."
+      },
+      {
+        "category": "wellness_adjacency",
+        "score_hint": 6.9,
+        "confidence": "medium",
+        "evidence": [
+          { "claim": "Brand philosophy emphasizes 'natural methodology' and respect for the hair — wellness-adjacent but not explicitly scalp-led.", "source_type": "about_page", "confidence": "medium" }
+        ]
+      },
+      {
+        "category": "clientele_affluence",
+        "score_hint": 8.1,
+        "confidence": "high",
+        "evidence": [
+          { "claim": "57th & Madison address; cuts priced from $280.", "source_type": "pricing_page", "confidence": "high" },
+          { "claim": "Reviews from editors, stylists, and named public figures.", "source_type": "reviews", "confidence": "high" }
+        ]
+      },
+      {
+        "category": "operational_fit",
+        "score_hint": 7.0,
+        "confidence": "medium",
+        "evidence": [
+          { "claim": "Townhouse format with multiple floors — private-room potential likely exists but must be confirmed.", "source_type": "about_page", "confidence": "medium" }
+        ],
+        "missing_data_note": "Floor plan and plumbing configuration unknown without site visit."
+      },
+      {
+        "category": "scale_signals",
+        "score_hint": 6.5,
+        "confidence": "medium",
+        "evidence": [
+          { "claim": "International footprint — sibling locations in Rome and Madrid. NYC location team size appears moderate (~8 stylists).", "source_type": "about_page", "confidence": "medium" }
+        ]
+      },
+      {
+        "category": "revenue_likelihood",
+        "score_hint": 7.8,
+        "confidence": "medium",
+        "evidence": [
+          { "claim": "High AOV plus named-talent demand suggests revenue likely above $1M at this location.", "source_type": "metadata", "confidence": "medium" }
+        ]
+      },
+      {
+        "category": "exclusivity_fit",
+        "score_hint": 7.4,
+        "confidence": "medium",
+        "evidence": [
+          { "claim": "Brand is premium and selective, though the web presence currently undersells the in-person experience.", "source_type": "homepage", "confidence": "medium" }
+        ]
+      }
+    ],
+    "hard_fail_flags": [],
+    "summary_note": "Physically a strong fit; digital presence creates analysis uncertainty. Warrant a human review + site visit."
+  }
+}

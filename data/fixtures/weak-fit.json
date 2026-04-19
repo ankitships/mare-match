@@ -1,0 +1,94 @@
+{
+  "prospect": {
+    "name": "CutZone Express",
+    "slug": "cutzone-express",
+    "website_url": "https://cutzone-express.example",
+    "city": "Phoenix",
+    "state": "AZ",
+    "notes": "Volume chain — 4 locations."
+  },
+  "evidence_payload": {
+    "categories": [
+      {
+        "category": "premium_aesthetic",
+        "score_hint": 2.3,
+        "confidence": "high",
+        "evidence": [
+          { "claim": "Homepage hero is a rotating discount carousel: '$19.99 cuts all week!'", "source_type": "homepage", "source_url": "https://cutzone-express.example", "excerpt": "Discount banners cover 3 of 4 hero slides.", "confidence": "high" },
+          { "claim": "Interior photography shows fluorescent overhead lighting, vinyl chairs, chain-style signage.", "source_type": "screenshot", "confidence": "high" }
+        ]
+      },
+      {
+        "category": "service_sophistication",
+        "score_hint": 2.5,
+        "confidence": "high",
+        "evidence": [
+          { "claim": "Menu is cuts + basic color only; no rituals, no consultations, no scalp services.", "source_type": "services_page", "confidence": "high" }
+        ]
+      },
+      {
+        "category": "retail_sophistication",
+        "score_hint": 1.8,
+        "confidence": "high",
+        "evidence": [
+          { "claim": "No retail shelving visible in any photography. No homecare mentioned on site.", "source_type": "screenshot", "confidence": "high" }
+        ]
+      },
+      {
+        "category": "wellness_adjacency",
+        "score_hint": 1.2,
+        "confidence": "high",
+        "evidence": [
+          { "claim": "No wellness, scalp, or ritual language anywhere on the site.", "source_type": "homepage", "confidence": "high" }
+        ]
+      },
+      {
+        "category": "clientele_affluence",
+        "score_hint": 2.1,
+        "confidence": "high",
+        "evidence": [
+          { "claim": "Locations in strip malls anchored by dollar stores.", "source_type": "contact_page", "confidence": "high" },
+          { "claim": "Cuts priced $19–$29. Color from $49.", "source_type": "pricing_page", "confidence": "high" }
+        ]
+      },
+      {
+        "category": "operational_fit",
+        "score_hint": 3.4,
+        "confidence": "medium",
+        "evidence": [
+          { "claim": "Open floor plan with 8 chairs and no private rooms. No plumbing beyond standard shampoo bowls.", "source_type": "screenshot", "confidence": "medium" }
+        ]
+      },
+      {
+        "category": "scale_signals",
+        "score_hint": 5.0,
+        "confidence": "medium",
+        "evidence": [
+          { "claim": "Four locations across Phoenix metro.", "source_type": "homepage", "confidence": "high" }
+        ]
+      },
+      {
+        "category": "revenue_likelihood",
+        "score_hint": 3.0,
+        "confidence": "medium",
+        "evidence": [
+          { "claim": "Multi-location but low AOV; revenue likely comes from volume, not margin.", "source_type": "metadata", "confidence": "medium" }
+        ]
+      },
+      {
+        "category": "exclusivity_fit",
+        "score_hint": 1.5,
+        "confidence": "high",
+        "evidence": [
+          { "claim": "Partnership would not feel mutually elevating — discount positioning conflicts with MaRe brand.", "source_type": "homepage", "confidence": "high" }
+        ]
+      }
+    ],
+    "hard_fail_flags": [
+      { "kind": "mass_market_discount", "detail": "Entire homepage is built around rotating discount offers.", "source_url": "https://cutzone-express.example" },
+      { "kind": "heavy_coupon_behavior", "detail": "Active Groupon listings across all four locations." },
+      { "kind": "low_end_aesthetic", "detail": "Fluorescent lighting, vinyl chairs, visible price-board signage." }
+    ],
+    "summary_note": "Hard fails across multiple guardrails. Not a fit."
+  }
+}
