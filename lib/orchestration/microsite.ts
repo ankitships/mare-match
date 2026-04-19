@@ -37,27 +37,27 @@ function fallbackPayload(prospect: ProspectRecord, score: ProspectScore): Micros
       ];
 
   return {
-    hero_title: `Why MaRe × ${prospect.name} makes sense`,
-    hero_subtitle: `A considered case for pairing ${prospect.name}${city} with the MaRe system — built around what already works at your salon.`,
+    hero_title: `A quiet proposal for ${prospect.name}`,
+    hero_subtitle: `A considered case for pairing ${prospect.name}${city} with the MaRe system, built around what already works at your salon.`,
     why_selected: why.slice(0, 5),
     mare_system: [
       { pillar: "MaRe Eye", body: "An AI-assisted scalp analysis that turns each guest's visit into a personalized record of care." },
       { pillar: "MaRe Capsule", body: "A premium multisensory chair built for a focused, fully immersive head-spa experience." },
-      { pillar: "Philip Martin's", body: "Italian professional and homecare products chosen for continuity between in-salon and at-home." },
+      { pillar: "Philip Martin's", body: "Italian professional and homecare products chosen for continuity between the salon and the home." },
       { pillar: "Ritual System", body: "Standardized 35 / 60 / 90-minute protocols that make the experience repeatable and trainable." },
-      { pillar: "Training & Support", body: "A dedicated MaRe Master from your team is trained, certified, and supported as the program grows." },
+      { pillar: "Training & Support", body: "A MaRe Master is trained from your existing team, certified, and supported as the program grows." },
     ],
     implementation: [
-      { requirement: "Dedicated treatment room", detail: "A quiet, private room so the ritual is undisturbed from start to finish." },
+      { requirement: "Dedicated treatment room", detail: "A quiet, private room so the ritual runs undisturbed from start to finish." },
       { requirement: "Plumbing", detail: "Standard salon-grade plumbing — no specialized infrastructure required." },
       { requirement: "Electrical", detail: "Basic electrical prep to support the Capsule and the Eye device." },
       { requirement: "Certified MaRe Master", detail: "One team member certified and on-protocol, with optional secondary training." },
       { requirement: "Retail display space", detail: "A small, curated shelf for Philip Martin's products to support continuity of care." },
     ],
-    why_different_body: `MaRe only opens a small number of partnerships each season. The fit has to feel mutually elevating — a salon we learn from, and a system your guests can feel on their first visit.`,
+    why_different_body: `We open a small number of partnerships each season. The fit has to feel mutually elevating — a salon we learn from, and a system your guests can feel on their first visit.`,
     next_step: {
-      cta_label: "Book a conversation",
-      message: `If this reads correctly, we'll set up a short private conversation with the MaRe partnerships team. No obligation — a composed, specific exchange.`,
+      cta_label: "Reply to the email",
+      message: `If this reads correctly, reply to the email. No form. No meeting link. Just a note.`,
     },
     theme: {},
   };
