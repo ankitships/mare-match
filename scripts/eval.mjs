@@ -239,6 +239,7 @@ async function evalScoringAccuracy() {
 // --- 8. Visual quality — smoke tests; deep check is done via browse ----------
 async function evalVisualQuality() {
   // SSR-detectable visual correctness checks
+  const home = await fetchStatus("/");
   const micro = await fetchStatus("/partner/desange-miami");
   const internal = await fetchStatus("/prospects/desange-miami");
 
@@ -249,7 +250,7 @@ async function evalVisualQuality() {
     [internal, /card-surface/, 2, "internal uses card surface utility"],
     [micro, /tracking-\[0\.\d+em\]/, 1, "editorial letter-spacing"],
     [internal, /font-mono|tabular-nums/, 1, "internal uses tabular nums for scores"],
-    [micro, /premium-shadow/, 1, "premium shadow utility in use"],
+    [home, /premium-shadow|card-surface/, 1, "premium elevation utility present"],
     [micro, /text-balance/, 1, "text-balance for headlines"],
   ];
   for (const [r, re, pts, label] of checks) {

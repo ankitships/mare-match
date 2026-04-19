@@ -82,7 +82,7 @@ export function OutreachStudio({
   return (
     <div className="mt-8 space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        <Badge variant="muted">Version {version}</Badge>
+        <Badge variant="muted">{`Version ${version}`}</Badge>
         <Button variant="outline" size="sm" onClick={regenerate} disabled={regenerating || saving}>
           {regenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCw className="h-3.5 w-3.5" />}
           Regenerate
