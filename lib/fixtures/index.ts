@@ -29,10 +29,20 @@ export const FIXTURES: FixtureFile[] = [
   ambiguous as unknown as FixtureFile,
 ];
 
+// Only route to a fixture when the URL unambiguously targets a demo host.
+// We previously matched on "miami" / "express" / etc., which caught real
+// salons. Now we require the exact demo domains so real prospects go
+// through the actual crawl + LLM pipeline.
+const FIXTURE_HOSTS: Array<{ re: RegExp; index: number }> = [
+  { re: /\bdesangesalon\.example\b/, index: 0 },
+  { re: /\bcutzone-express\.example\b/, index: 1 },
+  { re: /\brosanoferretti-nyc\.example\b/, index: 2 },
+];
+
 export function pickFixture(hayInput: string): FixtureFile | null {
   const hay = hayInput.toLowerCase();
-  if (/desange|miami/.test(hay)) return FIXTURES[0];
-  if (/cutzone|express|discount/.test(hay)) return FIXTURES[1];
-  if (/rosano|ferretti|ambiguous/.test(hay)) return FIXTURES[2];
+  for (const { re, index } of FIXTURE_HOSTS) {
+    if (re.test(hay)) return FIXTURES[index];
+  }
   return null;
 }
