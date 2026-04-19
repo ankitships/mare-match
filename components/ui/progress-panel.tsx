@@ -83,7 +83,7 @@ export function ProgressPanel({ steps, active, cycleMs = 2200, detail, className
       </ol>
 
       <p className="mt-4 pl-[20px] font-mono text-[10px] tabular-nums text-charcoal-500">
-        {String(elapsed).padStart(2, "0")}s elapsed · typically 8–20s
+        {String(elapsed).padStart(2, "0")}s elapsed · typically 8–15s
       </p>
     </div>
   );
